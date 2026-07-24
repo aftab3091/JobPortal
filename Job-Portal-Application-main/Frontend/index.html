@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerPulse - Next-Gen Job Portal Platform</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>CareerPulse</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="jobs.html">Find Jobs</a></li>
+            <li><a href="applications.html">Applications</a></li>
+            <li><a href="interviews.html">Interviews</a></li>
+            <li><a href="candidate_dashboard.html">Candidate Portal</a></li>
+            <li><a href="employer_dashboard.html">Employer Portal</a></li>
+            <li><a href="admin_dashboard.html">Admin Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div id="user-session-badge" class="user-badge">🌐 Guest</div>
+            <a href="login.html" id="nav-auth-btn" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Hero Section with Unique Workspace Photo Background -->
+        <section class="hero-section">
+            <div class="hero-tag">🚀 #1 AI-Powered Job Search Engine</div>
+            <h1 class="hero-title">Discover Your <span>Dream Career</span> Opportunity Today</h1>
+            <p class="hero-subtitle">Connect directly with top tier tech companies, startups, and enterprise employers hiring software developers, designers, and engineers worldwide.</p>
+            
+            <!-- Global Search & Filter Bar -->
+            <div class="search-box">
+                <div class="search-field">
+                    <span>🔍</span>
+                    <input type="text" id="home-search-keyword" placeholder="Job title, skills, or company...">
+                </div>
+                <div class="search-field">
+                    <span>📍</span>
+                    <input type="text" id="home-search-location" placeholder="City or Remote">
+                </div>
+                <div class="search-field">
+                    <span>💼</span>
+                    <select id="home-search-type">
+                        <option value="">All Job Types</option>
+                        <option value="Full Time">Full Time</option>
+                        <option value="Part Time">Part Time</option>
+                        <option value="Internship">Internship</option>
+                        <option value="Remote">Remote</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" style="height:48px; width:100%;" onclick="searchHomeJobs()">Search</button>
+            </div>
+        </section>
+
+        <!-- Featured Companies Section with Corporate HQ Photo Background -->
+        <section class="section-companies">
+            <div style="text-align:center; margin-bottom: 2.5rem;">
+                <h2 style="font-size: 1.8rem; font-weight: 800; color: white;">Featured Employers Hiring Now</h2>
+                <p style="color: var(--text-muted); font-size: 0.98rem; margin-top:0.4rem;">Join thousands of employees working at verified organizations</p>
+            </div>
+            <div id="featured-companies-grid" class="grid-cards">
+                <!-- Loaded Dynamically -->
+            </div>
+        </section>
+
+        <!-- Latest Jobs Section with Team Collaboration Photo Background -->
+        <section class="section-jobs">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2.5rem;">
+                <div>
+                    <h2 style="font-size: 1.8rem; font-weight: 800; color: white;">Latest Open Positions</h2>
+                    <p style="color: var(--text-muted); font-size: 0.98rem; margin-top:0.4rem;">Explore high-paying vacancies posted recently</p>
+                </div>
+                <a href="jobs.html" class="btn btn-outline">Explore All Jobs &rarr;</a>
+            </div>
+            <div id="latest-jobs-grid" class="grid-cards">
+                <!-- Loaded Dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CareerPulse Job Portal Application. Powered by Django REST APIs & Vanilla JS ES6.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadHomePageData();
+        });
+
+        async function loadHomePageData() {
+            try {
+                // Load Companies
+                const employers = await API.getEmployers();
+                const compContainer = document.getElementById('featured-companies-grid');
+                compContainer.innerHTML = employers.map(emp => `
+                    <div class="card">
+                        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.2rem;">
+                            <div class="job-icon">🏢</div>
+                            <div>
+                                <h3 style="color:white; font-size:1.15rem; font-weight:800;">${emp.company_name}</h3>
+                                <p style="color:var(--text-muted); font-size:0.85rem; font-weight:600;">${emp.industry}</p>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:0.4rem;">📍 Location: <strong style="color:white;">${emp.location}</strong></p>
+                            <p style="color:var(--text-muted); font-size:0.85rem;">HR Contact: <span style="color:#a5b4fc;">${emp.hr_name}</span></p>
+                        </div>
+                        <div style="border-top:1px solid var(--border-color); padding-top:0.8rem; font-size:0.82rem; color:var(--text-muted);">
+                            ✉️ ${emp.email}
+                        </div>
+                    </div>
+                `).join('') || '<p style="color:var(--text-muted)">No registered employers found.</p>';
+
+                // Load Jobs
+                const jobs = await API.getJobs();
+                renderJobsGrid(jobs.slice(0, 6));
+            } catch (err) {
+                showToast('Failed to connect to Django API backend. Ensure server is running.', 'error');
+            }
+        }
+
+        function renderJobsGrid(jobsList) {
+            const jobsContainer = document.getElementById('latest-jobs-grid');
+            if (!jobsList.length) {
+                jobsContainer.innerHTML = '<p style="color:var(--text-muted)">No active jobs matched your filter.</p>';
+                return;
+            }
+            jobsContainer.innerHTML = jobsList.map(j => `
+                <div class="card">
+                    <div>
+                        <div class="job-card-header">
+                            <div class="job-icon">💼</div>
+                            <span class="tag salary-tag">₹${Number(j.salary).toLocaleString()}/yr</span>
+                        </div>
+                        <h3 class="job-title">${j.job_title}</h3>
+                        <div class="company-name">🏢 ${j.company_name}</div>
+                        <div class="job-tags">
+                            <span class="tag">📍 ${j.location}</span>
+                            <span class="tag">⏳ ${j.job_type}</span>
+                            <span class="tag">🎯 ${j.experience_required} yrs exp</span>
+                        </div>
+                    </div>
+                    <div class="job-card-footer">
+                        <span class="job-date">Deadline: ${j.last_date}</span>
+                        <button class="btn btn-primary btn-sm" onclick="applyDirectly(${j.job_id}, '${j.job_title}', '${j.company_name}')">Apply Now</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchHomeJobs() {
+            const kw = document.getElementById('home-search-keyword').value.toLowerCase();
+            const loc = document.getElementById('home-search-location').value.toLowerCase();
+            const type = document.getElementById('home-search-type').value;
+
+            API.getJobs().then(jobs => {
+                const filtered = jobs.filter(j => 
+                    (!kw || j.job_title.toLowerCase().includes(kw) || j.company_name.toLowerCase().includes(kw) || j.location.toLowerCase().includes(kw)) &&
+                    (!loc || j.location.toLowerCase().includes(loc)) &&
+                    (!type || j.job_type === type)
+                );
+                renderJobsGrid(filtered);
+            });
+        }
+
+        function applyDirectly(jobId, jobTitle, companyName) {
+            window.location.href = `apply.html?job_id=${jobId}&title=${encodeURIComponent(jobTitle)}&company=${encodeURIComponent(companyName)}`;
+        }
+    </script>
+</body>
+</html>

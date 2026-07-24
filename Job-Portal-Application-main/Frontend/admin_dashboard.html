@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center - CareerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>CareerPulse</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="jobs.html">Find Jobs</a></li>
+            <li><a href="applications.html">Applications</a></li>
+            <li><a href="interviews.html">Interviews</a></li>
+            <li><a href="candidate_dashboard.html">Candidate Portal</a></li>
+            <li><a href="employer_dashboard.html">Employer Portal</a></li>
+            <li><a href="admin_dashboard.html" class="active">Admin Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div id="user-session-badge" class="user-badge">🌐 Guest</div>
+            <a href="login.html" id="nav-auth-btn" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1>System Administration Center</h1>
+                <p>Full CRUD control over all Candidates, Employers, Jobs, Applications, and Interview records.</p>
+            </div>
+            <div>
+                <button class="btn btn-outline" style="border-color:var(--accent); color:var(--accent);" onclick="seedSampleDataBtn()">🌱 Seed Sample Test Data</button>
+            </div>
+        </div>
+
+        <!-- System Counts Overview Header -->
+        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:1rem; margin-bottom:2.5rem;">
+            <div class="card" style="text-align:center; padding:1rem;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">Total Candidates</div>
+                <div id="cnt-candidates" style="font-size:1.8rem; font-weight:800; color:white;">0</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1rem;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">Total Employers</div>
+                <div id="cnt-employers" style="font-size:1.8rem; font-weight:800; color:#a5b4fc;">0</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1rem;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">Total Active Jobs</div>
+                <div id="cnt-jobs" style="font-size:1.8rem; font-weight:800; color:#34d399;">0</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1rem;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">Total Applications</div>
+                <div id="cnt-applications" style="font-size:1.8rem; font-weight:800; color:#f59e0b;">0</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1rem;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">Total Interviews</div>
+                <div id="cnt-interviews" style="font-size:1.8rem; font-weight:800; color:#c084fc;">0</div>
+            </div>
+        </div>
+
+        <!-- Module 1: Candidates Management -->
+        <section style="margin-bottom:3rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:white; font-size:1.3rem;">Module 1 — Candidate Management</h3>
+                <button class="btn btn-primary btn-sm" onclick="openAddCandidateModal()">+ Add Candidate</button>
+            </div>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Qualification</th>
+                            <th>Skills</th>
+                            <th>Experience</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-candidates-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Module 2: Employers Management -->
+        <section style="margin-bottom:3rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:white; font-size:1.3rem;">Module 2 — Employer Management</h3>
+                <button class="btn btn-primary btn-sm" onclick="openAddEmployerModal()">+ Add Employer</button>
+            </div>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Company Name</th>
+                            <th>HR Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Location</th>
+                            <th>Industry</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-employers-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Module 3: Jobs Management -->
+        <section style="margin-bottom:3rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:white; font-size:1.3rem;">Module 3 — Job Management</h3>
+                <button class="btn btn-primary btn-sm" onclick="openAddJobModal()">+ Add Job</button>
+            </div>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>Location</th>
+                            <th>Job Type</th>
+                            <th>Exp Required</th>
+                            <th>Salary</th>
+                            <th>Last Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-jobs-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Module 4: Job Applications Management -->
+        <section style="margin-bottom:3rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:white; font-size:1.3rem;">Module 4 — Job Application Management</h3>
+                <button class="btn btn-primary btn-sm" onclick="openAddAppModal()">+ Add Application</button>
+            </div>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>App ID</th>
+                            <th>Candidate Name</th>
+                            <th>Company</th>
+                            <th>Job Title</th>
+                            <th>Applied Date</th>
+                            <th>Resume</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-apps-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Module 5: Interview Management -->
+        <section style="margin-bottom:3rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="color:white; font-size:1.3rem;">Module 5 — Interview Management</h3>
+                <button class="btn btn-primary btn-sm" onclick="openAddInterviewModal()">+ Add Interview</button>
+            </div>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Candidate Name</th>
+                            <th>Company</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Mode</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-interviews-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CareerPulse Job Portal Application</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdminTables();
+        });
+
+        async function loadAdminTables() {
+            try {
+                const candidates = await API.getCandidates();
+                const employers = await API.getEmployers();
+                const jobs = await API.getJobs();
+                const apps = await API.getApplications();
+                const interviews = await API.getInterviews();
+
+                // Counts
+                document.getElementById('cnt-candidates').innerText = candidates.length;
+                document.getElementById('cnt-employers').innerText = employers.length;
+                document.getElementById('cnt-jobs').innerText = jobs.length;
+                document.getElementById('cnt-applications').innerText = apps.length;
+                document.getElementById('cnt-interviews').innerText = interviews.length;
+
+                // Candidates
+                document.getElementById('admin-candidates-tbody').innerHTML = candidates.map(c => `
+                    <tr>
+                        <td>#${c.candidate_id}</td>
+                        <td><strong>${c.full_name}</strong></td>
+                        <td>${c.email}</td>
+                        <td>${c.phone}</td>
+                        <td>${c.qualification}</td>
+                        <td>${c.skills}</td>
+                        <td>${c.experience} yrs</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCand(${c.candidate_id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('') || `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No candidates recorded.</td></tr>`;
+
+                // Employers
+                document.getElementById('admin-employers-tbody').innerHTML = employers.map(e => `
+                    <tr>
+                        <td>#${e.employer_id}</td>
+                        <td><strong>${e.company_name}</strong></td>
+                        <td>${e.hr_name}</td>
+                        <td>${e.email}</td>
+                        <td>${e.phone}</td>
+                        <td>${e.location}</td>
+                        <td>${e.industry}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteEmp(${e.employer_id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('') || `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No employers recorded.</td></tr>`;
+
+                // Jobs
+                document.getElementById('admin-jobs-tbody').innerHTML = jobs.map(j => `
+                    <tr>
+                        <td>#${j.job_id}</td>
+                        <td><strong>${j.job_title}</strong></td>
+                        <td>${j.company_name}</td>
+                        <td>${j.location}</td>
+                        <td><span class="tag">${j.job_type}</span></td>
+                        <td>${j.experience_required} yrs</td>
+                        <td>₹${Number(j.salary).toLocaleString()}</td>
+                        <td>${j.last_date}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteJob(${j.job_id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('') || `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">No jobs recorded.</td></tr>`;
+
+                // Applications
+                document.getElementById('admin-apps-tbody').innerHTML = apps.map(a => `
+                    <tr>
+                        <td>#${a.application_id}</td>
+                        <td><strong>${a.candidate_name}</strong></td>
+                        <td>${a.company_name}</td>
+                        <td>${a.job_title}</td>
+                        <td>${a.applied_date}</td>
+                        <td>📄 ${a.resume}</td>
+                        <td><span class="status-badge ${getAppStatusClass(a.application_status)}">${a.application_status}</span></td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteApp(${a.application_id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('') || `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No applications recorded.</td></tr>`;
+
+                // Interviews
+                document.getElementById('admin-interviews-tbody').innerHTML = interviews.map(i => `
+                    <tr>
+                        <td>#${i.interview_id}</td>
+                        <td><strong>${i.candidate_name}</strong></td>
+                        <td>${i.company_name}</td>
+                        <td>${i.interview_date}</td>
+                        <td>${i.interview_time}</td>
+                        <td><span class="tag">${i.interview_mode}</span></td>
+                        <td><span class="status-badge status-scheduled">${i.interview_status}</span></td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteInt(${i.interview_id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('') || `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No interviews recorded.</td></tr>`;
+
+            } catch (err) {
+                showToast('Failed to connect to Django API backend.', 'error');
+            }
+        }
+
+        function getAppStatusClass(status) {
+            switch(status) {
+                case 'Applied': return 'status-applied';
+                case 'Shortlisted': return 'status-shortlisted';
+                case 'Interview Scheduled': return 'status-interview';
+                case 'Selected': return 'status-selected';
+                case 'Rejected': return 'status-rejected';
+                default: return 'status-applied';
+            }
+        }
+
+        async function seedSampleDataBtn() {
+            const res = await API.seedDatabase();
+            if (res.status === 'success') {
+                showToast('Sample test data successfully re-seeded into SQLite DB!', 'success');
+                loadAdminTables();
+            }
+        }
+
+        // Delete handlers
+        async function deleteCand(id) { if (confirm(`Delete Candidate ${id}?`)) { await API.deleteCandidate(id); loadAdminTables(); } }
+        async function deleteEmp(id) { if (confirm(`Delete Employer ${id}?`)) { await API.deleteEmployer(id); loadAdminTables(); } }
+        async function deleteJob(id) { if (confirm(`Delete Job ${id}?`)) { await API.deleteJob(id); loadAdminTables(); } }
+        async function deleteApp(id) { if (confirm(`Delete Application ${id}?`)) { await API.deleteApplication(id); loadAdminTables(); } }
+        async function deleteInt(id) { if (confirm(`Delete Interview ${id}?`)) { await API.deleteInterview(id); loadAdminTables(); } }
+
+        // Add Modals
+        function openAddCandidateModal() {
+            openModal('Add Candidate (POST /candidates/add/)', `
+                <form id="adm-add-cand">
+                    <div class="form-group"><label>Candidate ID</label><input type="number" id="a-c-id" class="form-control" placeholder="103"></div>
+                    <div class="form-group"><label>Full Name</label><input type="text" id="a-c-name" class="form-control" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="a-c-email" class="form-control" required></div>
+                    <div class="form-group"><label>Phone</label><input type="text" id="a-c-phone" class="form-control" required></div>
+                    <div class="form-group"><label>Qualification</label><input type="text" id="a-c-qual" class="form-control" required></div>
+                    <div class="form-group"><label>Skills</label><input type="text" id="a-c-skills" class="form-control" required></div>
+                    <div class="form-group"><label>Experience (Yrs)</label><input type="number" id="a-c-exp" class="form-control" required></div>
+                    <div class="form-group"><label>Password</label><input type="text" id="a-c-pass" class="form-control" required></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create Candidate</button>
+                </form>
+            `);
+            document.getElementById('adm-add-cand').onsubmit = async (e) => {
+                e.preventDefault();
+                await API.addCandidate({
+                    candidate_id: document.getElementById('a-c-id').value ? parseInt(document.getElementById('a-c-id').value) : null,
+                    full_name: document.getElementById('a-c-name').value,
+                    email: document.getElementById('a-c-email').value,
+                    phone: document.getElementById('a-c-phone').value,
+                    qualification: document.getElementById('a-c-qual').value,
+                    skills: document.getElementById('a-c-skills').value,
+                    experience: parseInt(document.getElementById('a-c-exp').value),
+                    password: document.getElementById('a-c-pass').value
+                });
+                closeModal();
+                loadAdminTables();
+            };
+        }
+
+        function openAddEmployerModal() {
+            openModal('Add Employer (POST /employers/add/)', `
+                <form id="adm-add-emp">
+                    <div class="form-group"><label>Employer ID</label><input type="number" id="a-e-id" class="form-control" placeholder="203"></div>
+                    <div class="form-group"><label>Company Name</label><input type="text" id="a-e-company" class="form-control" required></div>
+                    <div class="form-group"><label>HR Name</label><input type="text" id="a-e-hr" class="form-control" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="a-e-email" class="form-control" required></div>
+                    <div class="form-group"><label>Phone</label><input type="text" id="a-e-phone" class="form-control" required></div>
+                    <div class="form-group"><label>Location</label><input type="text" id="a-e-loc" class="form-control" required></div>
+                    <div class="form-group"><label>Industry</label><input type="text" id="a-e-ind" class="form-control" required></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create Employer</button>
+                </form>
+            `);
+            document.getElementById('adm-add-emp').onsubmit = async (e) => {
+                e.preventDefault();
+                await API.addEmployer({
+                    employer_id: document.getElementById('a-e-id').value ? parseInt(document.getElementById('a-e-id').value) : null,
+                    company_name: document.getElementById('a-e-company').value,
+                    hr_name: document.getElementById('a-e-hr').value,
+                    email: document.getElementById('a-e-email').value,
+                    phone: document.getElementById('a-e-phone').value,
+                    location: document.getElementById('a-e-loc').value,
+                    industry: document.getElementById('a-e-ind').value
+                });
+                closeModal();
+                loadAdminTables();
+            };
+        }
+
+        function openAddJobModal() {
+            openModal('Add Job (POST /jobs/add/)', `
+                <form id="adm-add-job">
+                    <div class="form-group"><label>Job ID</label><input type="number" id="a-j-id" class="form-control" placeholder="304"></div>
+                    <div class="form-group"><label>Job Title</label><input type="text" id="a-j-title" class="form-control" required></div>
+                    <div class="form-group"><label>Company Name</label><input type="text" id="a-j-company" class="form-control" required></div>
+                    <div class="form-group"><label>Location</label><input type="text" id="a-j-loc" class="form-control" required></div>
+                    <div class="form-group"><label>Job Type</label><select id="a-j-type" class="form-control"><option value="Full Time">Full Time</option><option value="Part Time">Part Time</option><option value="Internship">Internship</option><option value="Remote">Remote</option></select></div>
+                    <div class="form-group"><label>Experience Required (Yrs)</label><input type="number" id="a-j-exp" class="form-control" required></div>
+                    <div class="form-group"><label>Salary</label><input type="number" id="a-j-salary" class="form-control" required></div>
+                    <div class="form-group"><label>Last Date</label><input type="date" id="a-j-date" class="form-control" value="2026-08-30" required></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create Job</button>
+                </form>
+            `);
+            document.getElementById('adm-add-job').onsubmit = async (e) => {
+                e.preventDefault();
+                await API.addJob({
+                    job_id: document.getElementById('a-j-id').value ? parseInt(document.getElementById('a-j-id').value) : null,
+                    job_title: document.getElementById('a-j-title').value,
+                    company_name: document.getElementById('a-j-company').value,
+                    location: document.getElementById('a-j-loc').value,
+                    job_type: document.getElementById('a-j-type').value,
+                    experience_required: parseInt(document.getElementById('a-j-exp').value),
+                    salary: parseInt(document.getElementById('a-j-salary').value),
+                    last_date: document.getElementById('a-j-date').value
+                });
+                closeModal();
+                loadAdminTables();
+            };
+        }
+
+        function openAddAppModal() {
+            openModal('Add Job Application (POST /applications/add/)', `
+                <form id="adm-add-app">
+                    <div class="form-group"><label>Application ID</label><input type="number" id="a-a-id" class="form-control" placeholder="402"></div>
+                    <div class="form-group"><label>Candidate Name</label><input type="text" id="a-a-cand" class="form-control" required></div>
+                    <div class="form-group"><label>Company Name</label><input type="text" id="a-a-company" class="form-control" required></div>
+                    <div class="form-group"><label>Job Title</label><input type="text" id="a-a-title" class="form-control" required></div>
+                    <div class="form-group"><label>Applied Date</label><input type="date" id="a-a-date" class="form-control" value="2026-07-15" required></div>
+                    <div class="form-group"><label>Resume File</label><input type="text" id="a-a-resume" class="form-control" value="resume.pdf" required></div>
+                    <div class="form-group"><label>Status</label><select id="a-a-status" class="form-control"><option value="Applied">Applied</option><option value="Shortlisted">Shortlisted</option><option value="Interview Scheduled">Interview Scheduled</option><option value="Selected">Selected</option><option value="Rejected">Rejected</option></select></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create Application Record</button>
+                </form>
+            `);
+            document.getElementById('adm-add-app').onsubmit = async (e) => {
+                e.preventDefault();
+                await API.addApplication({
+                    application_id: document.getElementById('a-a-id').value ? parseInt(document.getElementById('a-a-id').value) : null,
+                    candidate_name: document.getElementById('a-a-cand').value,
+                    company_name: document.getElementById('a-a-company').value,
+                    job_title: document.getElementById('a-a-title').value,
+                    applied_date: document.getElementById('a-a-date').value,
+                    resume: document.getElementById('a-a-resume').value,
+                    application_status: document.getElementById('a-a-status').value
+                });
+                closeModal();
+                loadAdminTables();
+            };
+        }
+
+        function openAddInterviewModal() {
+            openModal('Add Interview (POST /interviews/add/)', `
+                <form id="adm-add-int">
+                    <div class="form-group"><label>Interview ID</label><input type="number" id="a-i-id" class="form-control" placeholder="502"></div>
+                    <div class="form-group"><label>Candidate Name</label><input type="text" id="a-i-cand" class="form-control" required></div>
+                    <div class="form-group"><label>Company Name</label><input type="text" id="a-i-company" class="form-control" required></div>
+                    <div class="form-group"><label>Interview Date</label><input type="date" id="a-i-date" class="form-control" value="2026-07-25" required></div>
+                    <div class="form-group"><label>Interview Time</label><input type="time" id="a-i-time" class="form-control" value="10:30" required></div>
+                    <div class="form-group"><label>Mode</label><select id="a-i-mode" class="form-control"><option value="Online">Online</option><option value="Offline">Offline</option></select></div>
+                    <div class="form-group"><label>Status</label><select id="a-i-status" class="form-control"><option value="Scheduled">Scheduled</option><option value="Completed">Completed</option><option value="Selected">Selected</option><option value="Rejected">Rejected</option></select></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create Interview Entry</button>
+                </form>
+            `);
+            document.getElementById('adm-add-int').onsubmit = async (e) => {
+                e.preventDefault();
+                await API.addInterview({
+                    interview_id: document.getElementById('a-i-id').value ? parseInt(document.getElementById('a-i-id').value) : null,
+                    candidate_name: document.getElementById('a-i-cand').value,
+                    company_name: document.getElementById('a-i-company').value,
+                    interview_date: document.getElementById('a-i-date').value,
+                    interview_time: document.getElementById('a-i-time').value,
+                    interview_mode: document.getElementById('a-i-mode').value,
+                    interview_status: document.getElementById('a-i-status').value
+                });
+                closeModal();
+                loadAdminTables();
+            };
+        }
+    </script>
+</body>
+</html>

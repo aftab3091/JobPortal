@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application & Interview Booking - CareerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>CareerPulse</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="jobs.html">Find Jobs</a></li>
+            <li><a href="applications.html">Applications</a></li>
+            <li><a href="interviews.html">Interviews</a></li>
+            <li><a href="candidate_dashboard.html">Candidate Portal</a></li>
+            <li><a href="employer_dashboard.html">Employer Portal</a></li>
+            <li><a href="admin_dashboard.html">Admin Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div id="user-session-badge" class="user-badge">🌐 Guest</div>
+            <a href="login.html" id="nav-auth-btn" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div style="margin-bottom: 2rem;">
+            <a href="jobs.html" style="color:var(--primary); font-weight:700; text-decoration:none;">&larr; Back to Job Listings</a>
+        </div>
+
+        <!-- Header Overview Card -->
+        <div id="apply-job-header" class="card" style="margin-bottom:2rem; background:linear-gradient(135deg, rgba(18,24,38,0.9), rgba(99,102,241,0.15)); border-color:var(--primary-glow);">
+            <!-- Rendered Dynamically -->
+        </div>
+
+        <!-- Full Comprehensive Application Form -->
+        <div class="form-card" style="max-width: 900px; padding:3rem; margin:0 auto 4rem;">
+            <div style="text-align: center; margin-bottom: 2.5rem; border-bottom:1px solid var(--border-color); padding-bottom:1.5rem;">
+                <h2 style="font-size:2rem; font-weight:800; color:white;">Comprehensive Job Application</h2>
+                <p style="color:var(--text-muted); font-size:0.95rem; margin-top:0.4rem;">Complete all candidate details, upload your resume, and select your interview time slot</p>
+            </div>
+
+            <form id="full-application-form">
+                <!-- Section 1: Candidate Basic Info -->
+                <h3 style="color:#a5b4fc; font-size:1.15rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem;">
+                    👤 Section 1: Personal & Contact Information
+                </h3>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.5rem;">
+                    <div class="form-group">
+                        <label>Full Legal Name *</label>
+                        <input type="text" id="app-full-name" class="form-control" placeholder="Rahul Sharma" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" id="app-email" class="form-control" placeholder="rahul@gmail.com" required>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.5rem;">
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="text" id="app-phone" class="form-control" placeholder="9876543210" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Current City / Residential Address *</label>
+                        <input type="text" id="app-address" class="form-control" placeholder="Bangalore, Karnataka, India" required>
+                    </div>
+                </div>
+
+                <!-- Section 2: Education & Skills -->
+                <h3 style="color:#a5b4fc; font-size:1.15rem; margin-top:2rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem;">
+                    🎓 Section 2: Education, Experience & Projects
+                </h3>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.5rem;">
+                    <div class="form-group">
+                        <label>Highest Qualification / Degree *</label>
+                        <input type="text" id="app-education" class="form-control" placeholder="B.Tech Computer Science & Engineering" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Years of Professional Experience *</label>
+                        <input type="number" id="app-experience" class="form-control" placeholder="2" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label>Core Technical Skills (Comma Separated) *</label>
+                    <input type="text" id="app-skills" class="form-control" placeholder="Python, Django, REST APIs, JavaScript ES6, React, SQL" required>
+                </div>
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label>Key Projects & Portfolio URL *</label>
+                    <input type="text" id="app-projects" class="form-control" placeholder="https://github.com/my-profile/job-portal-app" required>
+                </div>
+                <div class="form-group" style="margin-bottom:2rem;">
+                    <label>Resume File Attachment Name *</label>
+                    <input type="text" id="app-resume-file" class="form-control" placeholder="rahul_sharma_developer_resume.pdf" required>
+                </div>
+
+                <!-- Section 3: Interview Slot Selection -->
+                <h3 style="color:#34d399; font-size:1.15rem; margin-top:2rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem;">
+                    📅 Section 3: Select & Book Your Interview Slot
+                </h3>
+                <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); padding:1.2rem; border-radius:var(--radius-md); margin-bottom:1.5rem;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1rem;">
+                        <div class="form-group">
+                            <label>Preferred Interview Date *</label>
+                            <input type="date" id="app-int-date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Time Slot *</label>
+                            <select id="app-int-time" class="form-control" required>
+                                <option value="10:00 AM">10:00 AM - 11:00 AM (Morning Slot)</option>
+                                <option value="11:30 AM">11:30 AM - 12:30 PM (Mid-Day Slot)</option>
+                                <option value="02:30 PM">02:30 PM - 03:30 PM (Afternoon Slot)</option>
+                                <option value="04:30 PM">04:30 PM - 05:30 PM (Evening Slot)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
+                        <div class="form-group">
+                            <label>Interview Mode *</label>
+                            <select id="app-int-mode" class="form-control" required>
+                                <option value="Online">Online Video Call (Google Meet / Zoom)</option>
+                                <option value="Offline">Offline On-Site Corporate Campus</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Preferred Location / Venue</label>
+                            <input type="text" id="app-int-venue" class="form-control" value="Bangalore HQ Tech Park" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Terms & Conditions Agreement -->
+                <h3 style="color:#fbbf24; font-size:1.15rem; margin-top:2rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem;">
+                    📜 Section 4: Declaration & Legal Agreement
+                </h3>
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1.5rem;">
+                    <div style="display:flex; items-center; gap:0.8rem;">
+                        <input type="checkbox" id="app-terms-agree" style="width:20px; height:20px; cursor:pointer;" required>
+                        <label for="app-terms-agree" style="color:var(--text-muted); font-size:0.88rem; cursor:pointer; margin:0;">
+                            I hereby confirm that all information provided in this application is accurate. I agree to the job portal <strong>Terms of Service</strong>, <strong>Background Verification Policy</strong>, and privacy guidelines.
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%; height:54px; font-size:1.1rem; justify-content:center;">
+                    🚀 Confirm & Submit Application + Book Interview Slot
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CareerPulse Job Portal Application</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let currentJob = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const jobId = urlParams.get('job_id');
+
+            // Populate form pre-fills if Candidate logged in
+            if (State.userType === 'candidate' && State.currentUser) {
+                document.getElementById('app-full-name').value = State.currentUser.full_name || '';
+                document.getElementById('app-email').value = State.currentUser.email || '';
+                document.getElementById('app-phone').value = State.currentUser.phone || '';
+                document.getElementById('app-education').value = State.currentUser.qualification || '';
+                document.getElementById('app-experience').value = State.currentUser.experience || 0;
+                document.getElementById('app-skills').value = State.currentUser.skills || '';
+                document.getElementById('app-resume-file').value = (State.currentUser.full_name || 'candidate').toLowerCase().replace(/\s+/g, '_') + '_resume.pdf';
+            }
+
+            // Set default date to 10 days from now
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 10);
+            document.getElementById('app-int-date').value = nextWeek.toISOString().split('T')[0];
+
+            // Fetch Job details
+            if (jobId) {
+                try {
+                    const jobs = await API.getJobs();
+                    currentJob = jobs.find(j => j.job_id == jobId);
+                } catch (e) {}
+            }
+
+            if (!currentJob) {
+                // Default fallback job object
+                currentJob = {
+                    job_id: jobId || 301,
+                    job_title: urlParams.get('title') || 'Python Full Stack Developer',
+                    company_name: urlParams.get('company') || 'Infosys',
+                    location: urlParams.get('location') || 'Bangalore',
+                    job_type: 'Full Time',
+                    experience_required: 2,
+                    salary: 800000,
+                    last_date: '2026-08-15'
+                };
+            }
+
+            // Render Header Card
+            document.getElementById('apply-job-header').innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:0.5rem;">
+                            <div class="job-icon">💼</div>
+                            <div>
+                                <h1 style="color:white; font-size:1.6rem; margin:0;">${currentJob.job_title}</h1>
+                                <p style="color:#a5b4fc; font-weight:700; margin:0;">🏢 ${currentJob.company_name}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <span class="tag salary-tag" style="font-size:0.9rem;">₹${Number(currentJob.salary).toLocaleString()}/yr</span>
+                        <div style="margin-top:0.4rem;">
+                            <span class="tag">📍 ${currentJob.location}</span>
+                            <span class="tag">⏳ ${currentJob.job_type}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-int-venue').value = `${currentJob.company_name} Tech Park (${currentJob.location})`;
+        });
+
+        document.getElementById('full-application-form').onsubmit = async (e) => {
+            e.preventDefault();
+
+            const candName = document.getElementById('app-full-name').value;
+            const resumeFile = document.getElementById('app-resume-file').value;
+            const intDate = document.getElementById('app-int-date').value;
+            const intTime = document.getElementById('app-int-time').value;
+            const intMode = document.getElementById('app-int-mode').value;
+            const today = new Date().toISOString().split('T')[0];
+
+            try {
+                // 1. Submit Job Application (POST /applications/add/)
+                const appRes = await API.addApplication({
+                    candidate_name: candName,
+                    company_name: currentJob.company_name,
+                    job_title: currentJob.job_title,
+                    applied_date: today,
+                    resume: resumeFile,
+                    application_status: 'Applied'
+                });
+
+                // 2. Schedule Interview Slot (POST /interviews/add/)
+                const intRes = await API.addInterview({
+                    candidate_name: candName,
+                    company_name: currentJob.company_name,
+                    interview_date: intDate,
+                    interview_time: intTime,
+                    interview_mode: intMode,
+                    interview_status: 'Scheduled'
+                });
+
+                if (appRes.status === 'success' && intRes.status === 'success') {
+                    showToast('Application Submitted & Interview Slot Booked!', 'success');
+                    
+                    // Display Confirmation Dialog
+                    openModal('🎉 Application Submitted & Slot Confirmed!', `
+                        <div style="text-align:center; padding:1.5rem;">
+                            <div style="font-size:3.5rem; margin-bottom:1rem;">✅</div>
+                            <h3 style="color:white; margin-bottom:0.5rem;">Congratulations, ${candName}!</h3>
+                            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:1.5rem;">
+                                Your application for <strong>${currentJob.job_title}</strong> at <strong>${currentJob.company_name}</strong> has been successfully registered.
+                            </p>
+                            
+                            <div style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); padding:1rem; border-radius:var(--radius-md); text-align:left; margin-bottom:1.5rem; font-size:0.9rem;">
+                                <p style="color:#a5b4fc; font-weight:700; margin-bottom:0.4rem;">🗓️ Confirmed Interview Details:</p>
+                                <p style="color:white;">• <strong>Date & Time:</strong> ${intDate} at ${intTime}</p>
+                                <p style="color:white;">• <strong>Mode:</strong> ${intMode}</p>
+                                <p style="color:white;">• <strong>Venue:</strong> ${document.getElementById('app-int-venue').value}</p>
+                            </div>
+
+                            <div style="display:flex; gap:1rem; justify-content:center;">
+                                <a href="applications.html" class="btn btn-primary">Track Application</a>
+                                <a href="interviews.html" class="btn btn-outline">View Interview Calendar</a>
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    showToast('Failed to process submission.', 'error');
+                }
+            } catch (err) {
+                showToast('API Communication error.', 'error');
+            }
+        };
+    </script>
+</body>
+</html>

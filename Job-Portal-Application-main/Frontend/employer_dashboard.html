@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Dashboard - CareerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>CareerPulse</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="jobs.html">Find Jobs</a></li>
+            <li><a href="applications.html">Applications</a></li>
+            <li><a href="interviews.html">Interviews</a></li>
+            <li><a href="candidate_dashboard.html">Candidate Portal</a></li>
+            <li><a href="employer_dashboard.html" class="active">Employer Portal</a></li>
+            <li><a href="admin_dashboard.html">Admin Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div id="user-session-badge" class="user-badge">🌐 Guest</div>
+            <a href="login.html" id="nav-auth-btn" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1>Employer Command Dashboard</h1>
+                <p>Post job openings, review received applications, schedule interviews, and select candidates.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openPostJobModal()">+ Post New Job Opening</button>
+        </div>
+
+        <!-- Employer Header Summary Card -->
+        <div id="emp-profile-card" class="card" style="margin-bottom:2rem; background:linear-gradient(135deg, rgba(18,24,38,0.9), rgba(16,185,129,0.1));">
+            <!-- Loaded via JS -->
+        </div>
+
+        <!-- Metric Statistics Cards -->
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:2.5rem;">
+            <div class="card" style="text-align:center; padding:1.2rem;">
+                <div style="color:var(--text-muted); font-size:0.85rem;">Active Jobs</div>
+                <div id="metric-jobs-count" style="font-size:2rem; font-weight:800; color:white; margin-top:0.3rem;">0</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1.2rem;">
+                <div style="color:var(--text-muted); font-size:0.85rem;">Received Applications</div>
+                <div id="metric-apps-count" style="font-size:2rem; font-weight:800; color:#a5b4fc; margin-top:0.3rem;">0</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1.2rem;">
+                <div style="color:var(--text-muted); font-size:0.85rem;">Interviews Scheduled</div>
+                <div id="metric-interviews-count" style="font-size:2rem; font-weight:800; color:#f59e0b; margin-top:0.3rem;">0</div>
+            </div>
+            <div class="card" style="text-align:center; padding:1.2rem;">
+                <div style="color:var(--text-muted); font-size:0.85rem;">Selected Candidates</div>
+                <div id="metric-selected-count" style="font-size:2rem; font-weight:800; color:#34d399; margin-top:0.3rem;">0</div>
+            </div>
+        </div>
+
+        <!-- Posted Jobs List Section -->
+        <section style="margin-bottom:3rem;">
+            <h3 style="color:white; font-size:1.2rem; margin-bottom:1rem;">💼 Posted Jobs List</h3>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Job Title</th>
+                            <th>Location</th>
+                            <th>Job Type</th>
+                            <th>Experience</th>
+                            <th>Salary</th>
+                            <th>Deadline</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emp-jobs-tbody">
+                        <!-- Loaded Dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Received Applications Section -->
+        <section style="margin-bottom:3rem;">
+            <h3 style="color:white; font-size:1.2rem; margin-bottom:1rem;">📥 Received Job Applications</h3>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>App ID</th>
+                            <th>Candidate Name</th>
+                            <th>Job Title</th>
+                            <th>Applied Date</th>
+                            <th>Resume</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emp-apps-tbody">
+                        <!-- Loaded Dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CareerPulse Job Portal Application</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let currentEmp = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (State.userType !== 'employer' || !State.currentUser) {
+                showToast('Please sign in as an Employer to access dashboard.', 'info');
+                setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+                return;
+            }
+            await loadEmployerDashboard();
+        });
+
+        async function loadEmployerDashboard() {
+            try {
+                const employers = await API.getEmployers();
+                currentEmp = employers.find(e => e.employer_id === State.currentUser.employer_id) || State.currentUser;
+
+                // Render Profile Card
+                document.getElementById('emp-profile-card').innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:0.8rem;">
+                                <div style="width:48px; height:48px; background:var(--primary); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:white;">🏢</div>
+                                <div>
+                                    <h2 style="color:white; font-size:1.4rem;">${currentEmp.company_name}</h2>
+                                    <p style="color:var(--text-muted); font-size:0.88rem;">HR Contact: <strong>${currentEmp.hr_name}</strong> (${currentEmp.email})</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="tag">📍 Location: ${currentEmp.location}</span>
+                            <span class="tag">Industry: ${currentEmp.industry}</span>
+                        </div>
+                    </div>
+                `;
+
+                // Load Jobs
+                const allJobs = await API.getJobs();
+                const empJobs = allJobs.filter(j => j.company_name.toLowerCase() === currentEmp.company_name.toLowerCase());
+                document.getElementById('metric-jobs-count').innerText = empJobs.length;
+
+                const jobsTbody = document.getElementById('emp-jobs-tbody');
+                if (empJobs.length) {
+                    jobsTbody.innerHTML = empJobs.map(j => `
+                        <tr>
+                            <td>#${j.job_id}</td>
+                            <td><strong>${j.job_title}</strong></td>
+                            <td>${j.location}</td>
+                            <td><span class="tag">${j.job_type}</span></td>
+                            <td>${j.experience_required} yrs</td>
+                            <td>₹${Number(j.salary).toLocaleString()}</td>
+                            <td>${j.last_date}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="deleteJobListing(${j.job_id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    jobsTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No active posted jobs. Click above to post a job.</td></tr>`;
+                }
+
+                // Load Applications
+                const allApps = await API.getApplications();
+                const empApps = allApps.filter(a => a.company_name.toLowerCase() === currentEmp.company_name.toLowerCase());
+                document.getElementById('metric-apps-count').innerText = empApps.length;
+                document.getElementById('metric-selected-count').innerText = empApps.filter(a => a.application_status === 'Selected').length;
+
+                const appsTbody = document.getElementById('emp-apps-tbody');
+                if (empApps.length) {
+                    appsTbody.innerHTML = empApps.map(a => `
+                        <tr>
+                            <td>#${a.application_id}</td>
+                            <td><strong>${a.candidate_name}</strong></td>
+                            <td>${a.job_title}</td>
+                            <td>${a.applied_date}</td>
+                            <td>📄 ${a.resume}</td>
+                            <td><span class="status-badge ${getAppStatusClass(a.application_status)}">${a.application_status}</span></td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="updateEmpAppStatus(${a.application_id}, '${a.application_status}', '${a.candidate_name}', '${a.job_title}')">Update / Schedule</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    appsTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No applications received yet.</td></tr>`;
+                }
+
+                // Load Interviews count
+                const interviews = await API.getInterviews();
+                const empInterviews = interviews.filter(i => i.company_name.toLowerCase() === currentEmp.company_name.toLowerCase());
+                document.getElementById('metric-interviews-count').innerText = empInterviews.length;
+
+            } catch (err) {
+                showToast('Failed to load employer dashboard.', 'error');
+            }
+        }
+
+        function getAppStatusClass(status) {
+            switch(status) {
+                case 'Applied': return 'status-applied';
+                case 'Shortlisted': return 'status-shortlisted';
+                case 'Interview Scheduled': return 'status-interview';
+                case 'Selected': return 'status-selected';
+                case 'Rejected': return 'status-rejected';
+                default: return 'status-applied';
+            }
+        }
+
+        function openPostJobModal() {
+            openModal('Post Vacancy Job Opening', `
+                <form id="create-job-form">
+                    <div class="form-group">
+                        <label>Job Title</label>
+                        <input type="text" id="post-title" class="form-control" placeholder="Python Full Stack Developer" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Company Name</label>
+                        <input type="text" id="post-company" class="form-control" value="${currentEmp.company_name}" readonly>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="post-location" class="form-control" value="${currentEmp.location}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Job Type</label>
+                            <select id="post-type" class="form-control">
+                                <option value="Full Time">Full Time</option>
+                                <option value="Part Time">Part Time</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Remote">Remote</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="form-group">
+                            <label>Experience Required (Yrs)</label>
+                            <input type="number" id="post-exp" class="form-control" placeholder="2" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Annual Salary (INR)</label>
+                            <input type="number" id="post-salary" class="form-control" placeholder="800000" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Application Date (YYYY-MM-DD)</label>
+                        <input type="date" id="post-deadline" class="form-control" value="2026-08-30" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Publish Job Opening</button>
+                </form>
+            `);
+
+            document.getElementById('create-job-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const res = await API.addJob({
+                    job_title: document.getElementById('post-title').value,
+                    company_name: currentEmp.company_name,
+                    location: document.getElementById('post-location').value,
+                    job_type: document.getElementById('post-type').value,
+                    experience_required: parseInt(document.getElementById('post-exp').value),
+                    salary: parseInt(document.getElementById('post-salary').value),
+                    last_date: document.getElementById('post-deadline').value
+                });
+                if (res.status === 'success') {
+                    showToast('Job created & published successfully!', 'success');
+                    closeModal();
+                    loadEmployerDashboard();
+                } else {
+                    showToast('Failed to post job opening.', 'error');
+                }
+            };
+        }
+
+        async function deleteJobListing(jobId) {
+            if (confirm(`Are you sure you want to delete job listing #${jobId}?`)) {
+                const res = await API.deleteJob(jobId);
+                if (res.status === 'success') {
+                    showToast('Job listing removed.', 'success');
+                    loadEmployerDashboard();
+                }
+            }
+        }
+
+        function updateEmpAppStatus(appId, currentStatus, candName, jobTitle) {
+            openModal(`Manage Candidate ${candName}`, `
+                <form id="emp-app-update-form">
+                    <div class="form-group">
+                        <label>Update Application Pipeline Status</label>
+                        <select id="emp-new-app-status" class="form-control">
+                            <option value="Applied" ${currentStatus==='Applied'?'selected':''}>Applied</option>
+                            <option value="Shortlisted" ${currentStatus==='Shortlisted'?'selected':''}>Shortlisted</option>
+                            <option value="Interview Scheduled" ${currentStatus==='Interview Scheduled'?'selected':''}>Interview Scheduled</option>
+                            <option value="Selected" ${currentStatus==='Selected'?'selected':''}>Selected</option>
+                            <option value="Rejected" ${currentStatus==='Rejected'?'selected':''}>Rejected</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Save Pipeline Status</button>
+                </form>
+            `);
+
+            document.getElementById('emp-app-update-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const newStat = document.getElementById('emp-new-app-status').value;
+                const res = await API.updateApplication(appId, { application_status: newStat });
+                if (res.status === 'success') {
+                    showToast('Application updated successfully!', 'success');
+                    closeModal();
+                    loadEmployerDashboard();
+                }
+            };
+        }
+    </script>
+</body>
+</html>

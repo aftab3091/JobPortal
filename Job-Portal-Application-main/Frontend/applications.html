@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Applications - CareerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>CareerPulse</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="jobs.html">Find Jobs</a></li>
+            <li><a href="applications.html" class="active">Applications</a></li>
+            <li><a href="interviews.html">Interviews</a></li>
+            <li><a href="candidate_dashboard.html">Candidate Portal</a></li>
+            <li><a href="employer_dashboard.html">Employer Portal</a></li>
+            <li><a href="admin_dashboard.html">Admin Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div id="user-session-badge" class="user-badge">🌐 Guest</div>
+            <a href="login.html" id="nav-auth-btn" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+                <h1>Job Applications Tracker</h1>
+                <p>Track real-time status of submitted applications, resumes, and hiring pipelines.</p>
+            </div>
+            <div class="search-field" style="max-width:250px;">
+                <span>🏷️</span>
+                <select id="status-filter" onchange="loadApplications()">
+                    <option value="">All Statuses</option>
+                    <option value="Applied">Applied</option>
+                    <option value="Shortlisted">Shortlisted</option>
+                    <option value="Interview Scheduled">Interview Scheduled</option>
+                    <option value="Selected">Selected</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>App ID</th>
+                        <th>Candidate Name</th>
+                        <th>Company Name</th>
+                        <th>Job Title</th>
+                        <th>Applied Date</th>
+                        <th>Resume Document</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="applications-table-body">
+                    <!-- Loaded Dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CareerPulse Job Portal Application</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApplications();
+        });
+
+        async function loadApplications() {
+            try {
+                let apps = await API.getApplications();
+                const filterVal = document.getElementById('status-filter').value;
+                if (filterVal) {
+                    apps = apps.filter(a => a.application_status === filterVal);
+                }
+
+                // If logged in as Candidate, show candidate's applications
+                if (State.userType === 'candidate' && State.currentUser) {
+                    apps = apps.filter(a => a.candidate_name.toLowerCase() === State.currentUser.full_name.toLowerCase());
+                }
+
+                const tbody = document.getElementById('applications-table-body');
+                if (!apps.length) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:2rem;">No job applications found matching filter.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = apps.map(a => {
+                    const statusClass = getStatusClass(a.application_status);
+                    return `
+                        <tr>
+                            <td>#${a.application_id}</td>
+                            <td><strong>${a.candidate_name}</strong></td>
+                            <td>${a.company_name}</td>
+                            <td><span style="color:#a5b4fc; font-weight:600;">${a.job_title}</span></td>
+                            <td>${a.applied_date}</td>
+                            <td>
+                                <a href="#" style="color:var(--accent); text-decoration:none;" onclick="event.preventDefault(); previewResume('${a.resume}', '${a.candidate_name}')">
+                                    📄 ${a.resume}
+                                </a>
+                            </td>
+                            <td><span class="status-badge ${statusClass}">${a.application_status}</span></td>
+                            <td>
+                                ${State.userType === 'employer' || State.userType === 'admin' ? `
+                                    <button class="btn btn-outline btn-sm" onclick="editAppStatus(${a.application_id}, '${a.application_status}')">Update Status</button>
+                                ` : `
+                                    <span style="color:var(--text-muted); font-size:0.8rem;">Track Only</span>
+                                `}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                showToast('Failed to fetch applications.', 'error');
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'Applied': return 'status-applied';
+                case 'Shortlisted': return 'status-shortlisted';
+                case 'Interview Scheduled': return 'status-interview';
+                case 'Selected': return 'status-selected';
+                case 'Rejected': return 'status-rejected';
+                default: return 'status-applied';
+            }
+        }
+
+        function previewResume(fileName, candidateName) {
+            openModal(`Resume Preview - ${candidateName}`, `
+                <div style="text-align:center; padding:1.5rem;">
+                    <div style="font-size:3rem; margin-bottom:1rem;">📄</div>
+                    <h4 style="color:white; margin-bottom:0.5rem;">${fileName}</h4>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Submitted candidate resume document</p>
+                    <a href="data:text/plain;charset=utf-8,Candidate%20Resume%20Content%20for%20${encodeURIComponent(candidateName)}" download="${fileName}" class="btn btn-primary">
+                        📥 Download Resume File
+                    </a>
+                </div>
+            `);
+        }
+
+        function editAppStatus(appId, currentStatus) {
+            openModal(`Update Application #${appId}`, `
+                <form id="update-status-form">
+                    <div class="form-group">
+                        <label>Select New Status</label>
+                        <select id="new-status-val" class="form-control">
+                            <option value="Applied" ${currentStatus==='Applied'?'selected':''}>Applied</option>
+                            <option value="Shortlisted" ${currentStatus==='Shortlisted'?'selected':''}>Shortlisted</option>
+                            <option value="Interview Scheduled" ${currentStatus==='Interview Scheduled'?'selected':''}>Interview Scheduled</option>
+                            <option value="Selected" ${currentStatus==='Selected'?'selected':''}>Selected</option>
+                            <option value="Rejected" ${currentStatus==='Rejected'?'selected':''}>Rejected</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Save Application Status</button>
+                </form>
+            `);
+
+            document.getElementById('update-status-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const newStat = document.getElementById('new-status-val').value;
+                const res = await API.updateApplication(appId, { application_status: newStat });
+                if (res.status === 'success') {
+                    showToast('Application status updated!', 'success');
+                    closeModal();
+                    loadApplications();
+                } else {
+                    showToast('Update failed.', 'error');
+                }
+            };
+        }
+    </script>
+</body>
+</html>

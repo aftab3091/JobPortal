@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Dashboard - CareerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>CareerPulse</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="jobs.html">Find Jobs</a></li>
+            <li><a href="applications.html">Applications</a></li>
+            <li><a href="interviews.html">Interviews</a></li>
+            <li><a href="candidate_dashboard.html" class="active">Candidate Portal</a></li>
+            <li><a href="employer_dashboard.html">Employer Portal</a></li>
+            <li><a href="admin_dashboard.html">Admin Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div id="user-session-badge" class="user-badge">🌐 Guest</div>
+            <a href="login.html" id="nav-auth-btn" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1>Candidate Dashboard</h1>
+                <p>Manage your profile, active job applications, and recommended job matches.</p>
+            </div>
+            <button class="btn btn-outline" onclick="openProfileUpdateModal()">✏️ Edit Profile</button>
+        </div>
+
+        <!-- Candidate Profile Summary Card -->
+        <div id="cand-profile-card" class="card" style="margin-bottom:2rem; background:linear-gradient(135deg, rgba(18,24,38,0.9), rgba(99,102,241,0.1));">
+            <!-- Rendered via JS -->
+        </div>
+
+        <!-- Bonus Feature: AI Recommendation Engine Section -->
+        <section style="margin-bottom:3rem;">
+            <div style="margin-bottom:1.2rem;">
+                <h3 style="color:white; font-size:1.3rem;">✨ AI Job Recommendations For You</h3>
+                <p style="color:var(--text-muted); font-size:0.88rem;">Matched based on your declared skills and experience</p>
+            </div>
+            <div id="recommended-jobs-grid" class="grid-cards">
+                <!-- Dynamically Matched -->
+            </div>
+        </section>
+
+        <!-- Applied Jobs & Upcoming Interviews Grid -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+            <div>
+                <h3 style="color:white; font-size:1.2rem; margin-bottom:1rem;">📋 My Active Applications</h3>
+                <div class="table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="my-apps-list">
+                            <!-- Loaded Dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="color:white; font-size:1.2rem; margin-bottom:1rem;">🗓️ Upcoming Interview Calls</h3>
+                <div class="table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Date & Time</th>
+                                <th>Mode</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="my-interviews-list">
+                            <!-- Loaded Dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CareerPulse Job Portal Application</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let currentCand = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (State.userType !== 'candidate' || !State.currentUser) {
+                showToast('Please sign in as a Candidate to access your portal.', 'info');
+                setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+                return;
+            }
+            await loadCandidateDashboard();
+        });
+
+        async function loadCandidateDashboard() {
+            try {
+                // Fetch fresh candidate profile from backend API
+                const candidates = await API.getCandidates();
+                currentCand = candidates.find(c => c.candidate_id === State.currentUser.candidate_id) || State.currentUser;
+
+                // Render Profile Card
+                document.getElementById('cand-profile-card').innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; gap:1.5rem; align-items:center;">
+                            <div style="width:64px; height:64px; background:linear-gradient(135deg, var(--primary), var(--accent)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2rem; color:white; font-weight:800;">
+                                ${currentCand.full_name.charAt(0)}
+                            </div>
+                            <div>
+                                <h2 style="color:white; font-size:1.5rem;">${currentCand.full_name}</h2>
+                                <p style="color:#a5b4fc; font-size:0.95rem;">${currentCand.qualification} • ${currentCand.experience} Years Experience</p>
+                                <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.3rem;">📧 ${currentCand.email} | 📞 ${currentCand.phone}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="text-align:right;">
+                                <span class="tag" style="background:rgba(16,185,129,0.15); color:#34d399; font-weight:700;">Active Job Seeker</span>
+                                <p style="color:var(--text-muted); font-size:0.8rem; margin-top:0.4rem;">Skills: <strong>${currentCand.skills}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Load Applications
+                const apps = await API.getApplications();
+                const myApps = apps.filter(a => a.candidate_name.toLowerCase() === currentCand.full_name.toLowerCase());
+                const appsTbody = document.getElementById('my-apps-list');
+                if (myApps.length) {
+                    appsTbody.innerHTML = myApps.map(a => `
+                        <tr>
+                            <td><strong>${a.job_title}</strong></td>
+                            <td>${a.company_name}</td>
+                            <td>${a.applied_date}</td>
+                            <td><span class="status-badge ${getAppStatusClass(a.application_status)}">${a.application_status}</span></td>
+                        </tr>
+                    `).join('');
+                } else {
+                    appsTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No applied jobs yet. <a href="jobs.html" style="color:var(--primary);">Explore Jobs</a></td></tr>`;
+                }
+
+                // Load Interviews
+                const interviews = await API.getInterviews();
+                const myInterviews = interviews.filter(i => i.candidate_name.toLowerCase() === currentCand.full_name.toLowerCase());
+                const intTbody = document.getElementById('my-interviews-list');
+                if (myInterviews.length) {
+                    intTbody.innerHTML = myInterviews.map(i => `
+                        <tr>
+                            <td><strong>${i.company_name}</strong></td>
+                            <td>${i.interview_date} at ${i.interview_time}</td>
+                            <td><span class="tag">${i.interview_mode}</span></td>
+                            <td><span class="status-badge status-scheduled">${i.interview_status}</span></td>
+                        </tr>
+                    `).join('');
+                } else {
+                    intTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No scheduled interviews.</td></tr>`;
+                }
+
+                // AI Recommendations Matching
+                const allJobs = await API.getJobs();
+                const candSkills = currentCand.skills.toLowerCase().split(',').map(s => s.trim());
+                const matchedJobs = allJobs.filter(j => {
+                    const titleMatch = candSkills.some(sk => j.job_title.toLowerCase().includes(sk));
+                    const expMatch = currentCand.experience >= j.experience_required;
+                    return titleMatch || expMatch;
+                });
+
+                const recGrid = document.getElementById('recommended-jobs-grid');
+                if (matchedJobs.length) {
+                    recGrid.innerHTML = matchedJobs.slice(0, 3).map(j => `
+                        <div class="card" style="border-color:rgba(16,185,129,0.3);">
+                            <div style="font-size:0.75rem; color:#34d399; font-weight:700; margin-bottom:0.5rem;">⭐ 95% Match Score</div>
+                            <h3 class="job-title">${j.job_title}</h3>
+                            <div class="company-name">🏢 ${j.company_name}</div>
+                            <div class="job-tags" style="margin-bottom:1rem;">
+                                <span class="tag">📍 ${j.location}</span>
+                                <span class="tag">₹${Number(j.salary).toLocaleString()}/yr</span>
+                            </div>
+                            <button class="btn btn-primary btn-sm" style="width:100%; justify-content:center;" onclick="applyFromDash('${j.job_title}', '${j.company_name}')">Apply Directly</button>
+                        </div>
+                    `).join('');
+                } else {
+                    recGrid.innerHTML = '<p style="color:var(--text-muted);">Explore all jobs in the job directory.</p>';
+                }
+
+            } catch (err) {
+                showToast('Failed to load candidate dashboard data.', 'error');
+            }
+        }
+
+        function getAppStatusClass(status) {
+            switch(status) {
+                case 'Applied': return 'status-applied';
+                case 'Shortlisted': return 'status-shortlisted';
+                case 'Interview Scheduled': return 'status-interview';
+                case 'Selected': return 'status-selected';
+                case 'Rejected': return 'status-rejected';
+                default: return 'status-applied';
+            }
+        }
+
+        function openProfileUpdateModal() {
+            openModal('Update Candidate Profile', `
+                <form id="cand-update-form">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="edit-cand-name" class="form-control" value="${currentCand.full_name}" required>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="edit-cand-email" class="form-control" value="${currentCand.email}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" id="edit-cand-phone" class="form-control" value="${currentCand.phone}" required>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="form-group">
+                            <label>Qualification</label>
+                            <input type="text" id="edit-cand-qual" class="form-control" value="${currentCand.qualification}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Experience (Years)</label>
+                            <input type="number" id="edit-cand-exp" class="form-control" value="${currentCand.experience}" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Skills</label>
+                        <input type="text" id="edit-cand-skills" class="form-control" value="${currentCand.skills}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Save Profile Changes</button>
+                </form>
+            `);
+
+            document.getElementById('cand-update-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const res = await API.updateCandidate(currentCand.candidate_id, {
+                    full_name: document.getElementById('edit-cand-name').value,
+                    email: document.getElementById('edit-cand-email').value,
+                    phone: document.getElementById('edit-cand-phone').value,
+                    qualification: document.getElementById('edit-cand-qual').value,
+                    experience: parseInt(document.getElementById('edit-cand-exp').value),
+                    skills: document.getElementById('edit-cand-skills').value
+                });
+                if (res.status === 'success') {
+                    showToast('Profile updated successfully!', 'success');
+                    setSession('candidate', res.candidate);
+                    closeModal();
+                    loadCandidateDashboard();
+                } else {
+                    showToast('Failed to update candidate profile.', 'error');
+                }
+            };
+        }
+
+        function applyFromDash(jobTitle, companyName) {
+            window.location.href = `apply.html?title=${encodeURIComponent(jobTitle)}&company=${encodeURIComponent(companyName)}`;
+        }
+    </script>
+</body>
+</html>

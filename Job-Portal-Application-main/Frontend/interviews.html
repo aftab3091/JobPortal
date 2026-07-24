@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interviews Schedule - CareerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>CareerPulse</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="jobs.html">Find Jobs</a></li>
+            <li><a href="applications.html">Applications</a></li>
+            <li><a href="interviews.html" class="active">Interviews</a></li>
+            <li><a href="candidate_dashboard.html">Candidate Portal</a></li>
+            <li><a href="employer_dashboard.html">Employer Portal</a></li>
+            <li><a href="admin_dashboard.html">Admin Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div id="user-session-badge" class="user-badge">🌐 Guest</div>
+            <a href="login.html" id="nav-auth-btn" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1>Interview Schedule Center</h1>
+                <p>Monitor online and offline technical interviews, test sessions, and status timelines.</p>
+            </div>
+            <div id="employer-schedule-action" style="display:none;">
+                <button class="btn btn-primary" onclick="openScheduleModal()">+ Schedule New Interview</button>
+            </div>
+        </div>
+
+        <!-- Timeline / Visual Calendar Widget (Bonus Feature) -->
+        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem; margin-bottom:2.5rem;">
+            <h3 style="color:white; font-size:1.1rem; margin-bottom:1rem;">📅 Upcoming Calendar Highlights</h3>
+            <div id="interview-calendar-highlight" style="display:flex; gap:1rem; overflow-x:auto; padding-bottom:0.5rem;">
+                <!-- Dynamically Rendered Timeline Badges -->
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Interview ID</th>
+                        <th>Candidate Name</th>
+                        <th>Company Name</th>
+                        <th>Interview Date</th>
+                        <th>Time</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="interviews-table-body">
+                    <!-- Loaded Dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CareerPulse Job Portal Application</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (State.userType === 'employer' || State.userType === 'admin') {
+                document.getElementById('employer-schedule-action').style.display = 'block';
+            }
+            loadInterviews();
+        });
+
+        async function loadInterviews() {
+            try {
+                let interviews = await API.getInterviews();
+                
+                if (State.userType === 'candidate' && State.currentUser) {
+                    interviews = interviews.filter(i => i.candidate_name.toLowerCase() === State.currentUser.full_name.toLowerCase());
+                } else if (State.userType === 'employer' && State.currentUser) {
+                    interviews = interviews.filter(i => i.company_name.toLowerCase() === State.currentUser.company_name.toLowerCase());
+                }
+
+                // Render Timeline highlight
+                const calWidget = document.getElementById('interview-calendar-highlight');
+                if (interviews.length) {
+                    calWidget.innerHTML = interviews.map(item => `
+                        <div style="min-width:200px; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25); padding:1rem; border-radius:var(--radius-sm);">
+                            <div style="font-size:0.8rem; color:#a5b4fc; font-weight:700;">${item.interview_date} at ${item.interview_time}</div>
+                            <div style="color:white; font-weight:700; margin:0.3rem 0;">${item.candidate_name}</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted);">${item.company_name} (${item.interview_mode})</div>
+                        </div>
+                    `).join('');
+                } else {
+                    calWidget.innerHTML = '<p style="color:var(--text-muted);">No upcoming scheduled interviews in calendar.</p>';
+                }
+
+                // Render Table
+                const tbody = document.getElementById('interviews-table-body');
+                if (!interviews.length) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:2rem;">No interviews scheduled.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = interviews.map(i => `
+                    <tr>
+                        <td>#${i.interview_id}</td>
+                        <td><strong>${i.candidate_name}</strong></td>
+                        <td>${i.company_name}</td>
+                        <td>🗓️ ${i.interview_date}</td>
+                        <td>⏰ ${i.interview_time}</td>
+                        <td><span class="tag">${i.interview_mode}</span></td>
+                        <td><span class="status-badge ${getInterviewStatusClass(i.interview_status)}">${i.interview_status}</span></td>
+                        <td>
+                            ${State.userType === 'employer' || State.userType === 'admin' ? `
+                                <button class="btn btn-outline btn-sm" onclick="editInterviewStatus(${i.interview_id}, '${i.interview_status}')">Update</button>
+                            ` : `
+                                <span style="color:var(--text-muted); font-size:0.8rem;">View Only</span>
+                            `}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                showToast('Failed to load interviews.', 'error');
+            }
+        }
+
+        function getInterviewStatusClass(status) {
+            switch(status) {
+                case 'Scheduled': return 'status-scheduled';
+                case 'Completed': return 'status-completed';
+                case 'Selected': return 'status-selected';
+                case 'Rejected': return 'status-rejected';
+                default: return 'status-scheduled';
+            }
+        }
+
+        function openScheduleModal() {
+            openModal('Schedule Technical Interview', `
+                <form id="schedule-interview-form">
+                    <div class="form-group">
+                        <label>Candidate Name</label>
+                        <input type="text" id="sched-cand-name" class="form-control" placeholder="Rahul Sharma" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Company Name</label>
+                        <input type="text" id="sched-company" class="form-control" value="${State.userType==='employer'?State.currentUser.company_name:'Infosys'}" required>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="form-group">
+                            <label>Date (YYYY-MM-DD)</label>
+                            <input type="date" id="sched-date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Time (HH:MM)</label>
+                            <input type="time" id="sched-time" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mode</label>
+                        <select id="sched-mode" class="form-control">
+                            <option value="Online">Online (Google Meet / Zoom)</option>
+                            <option value="Offline">Offline (On-Site Office)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create Interview Entry</button>
+                </form>
+            `);
+
+            document.getElementById('schedule-interview-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const res = await API.addInterview({
+                    candidate_name: document.getElementById('sched-cand-name').value,
+                    company_name: document.getElementById('sched-company').value,
+                    interview_date: document.getElementById('sched-date').value,
+                    interview_time: document.getElementById('sched-time').value,
+                    interview_mode: document.getElementById('sched-mode').value,
+                    interview_status: 'Scheduled'
+                });
+                if (res.status === 'success') {
+                    showToast('Interview scheduled successfully!', 'success');
+                    closeModal();
+                    loadInterviews();
+                } else {
+                    showToast('Failed to schedule interview.', 'error');
+                }
+            };
+        }
+
+        function editInterviewStatus(id, currentStatus) {
+            openModal(`Update Interview #${id}`, `
+                <form id="edit-interview-form">
+                    <div class="form-group">
+                        <label>Select Status</label>
+                        <select id="int-status-val" class="form-control">
+                            <option value="Scheduled" ${currentStatus==='Scheduled'?'selected':''}>Scheduled</option>
+                            <option value="Completed" ${currentStatus==='Completed'?'selected':''}>Completed</option>
+                            <option value="Selected" ${currentStatus==='Selected'?'selected':''}>Selected</option>
+                            <option value="Rejected" ${currentStatus==='Rejected'?'selected':''}>Rejected</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Save Interview Status</button>
+                </form>
+            `);
+
+            document.getElementById('edit-interview-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const res = await API.updateInterview(id, {
+                    interview_status: document.getElementById('int-status-val').value
+                });
+                if (res.status === 'success') {
+                    showToast('Interview status updated successfully!', 'success');
+                    closeModal();
+                    loadInterviews();
+                } else {
+                    showToast('Failed to update status.', 'error');
+                }
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Jobs - CareerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>CareerPulse</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="jobs.html" class="active">Find Jobs</a></li>
+            <li><a href="applications.html">Applications</a></li>
+            <li><a href="interviews.html">Interviews</a></li>
+            <li><a href="candidate_dashboard.html">Candidate Portal</a></li>
+            <li><a href="employer_dashboard.html">Employer Portal</a></li>
+            <li><a href="admin_dashboard.html">Admin Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <div id="user-session-badge" class="user-badge">🌐 Guest</div>
+            <a href="login.html" id="nav-auth-btn" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="page-header">
+            <h1>Browse Open Jobs</h1>
+            <p>Filter through available vacancies, review details, and submit your applications directly.</p>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="search-box" style="margin-bottom:2.5rem;">
+            <div class="search-field">
+                <span>🔍</span>
+                <input type="text" id="filter-keyword" placeholder="Filter by title, skills..." oninput="filterJobs()">
+            </div>
+            <div class="search-field">
+                <span>📍</span>
+                <input type="text" id="filter-location" placeholder="City or Remote..." oninput="filterJobs()">
+            </div>
+            <div class="search-field">
+                <span>💼</span>
+                <select id="filter-type" onchange="filterJobs()">
+                    <option value="">All Job Types</option>
+                    <option value="Full Time">Full Time</option>
+                    <option value="Part Time">Part Time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Remote">Remote</option>
+                </select>
+            </div>
+            <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
+        </div>
+
+        <!-- Jobs Grid Container -->
+        <div id="jobs-catalog-grid" class="grid-cards">
+            <!-- Loaded Dynamically -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CareerPulse Job Portal Application</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let rawJobsList = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchAndRenderJobs();
+        });
+
+        async function fetchAndRenderJobs() {
+            try {
+                rawJobsList = await API.getJobs();
+                filterJobs();
+            } catch (e) {
+                showToast('Failed to load job listings.', 'error');
+            }
+        }
+
+        function filterJobs() {
+            const kw = document.getElementById('filter-keyword').value.toLowerCase();
+            const loc = document.getElementById('filter-location').value.toLowerCase();
+            const type = document.getElementById('filter-type').value;
+
+            const filtered = rawJobsList.filter(j => 
+                (!kw || j.job_title.toLowerCase().includes(kw) || j.company_name.toLowerCase().includes(kw)) &&
+                (!loc || j.location.toLowerCase().includes(loc)) &&
+                (!type || j.job_type === type)
+            );
+
+            const grid = document.getElementById('jobs-catalog-grid');
+            if (!filtered.length) {
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">No matching jobs found. Try resetting filters.</div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(j => `
+                <div class="card">
+                    <div class="job-card-header">
+                        <div class="job-icon">💼</div>
+                        <span class="tag salary-tag">₹${Number(j.salary).toLocaleString()}/yr</span>
+                    </div>
+                    <h3 class="job-title">${j.job_title}</h3>
+                    <div class="company-name">🏢 ${j.company_name}</div>
+                    <div class="job-tags">
+                        <span class="tag">📍 ${j.location}</span>
+                        <span class="tag">⏳ ${j.job_type}</span>
+                        <span class="tag">🎯 ${j.experience_required} Yrs Exp</span>
+                    </div>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">Job ID: #${j.job_id}</p>
+                    <div class="job-card-footer">
+                        <span class="job-date">Deadline: ${j.last_date}</span>
+                        <button class="btn btn-primary btn-sm" onclick="triggerApplyModal(${j.job_id}, '${j.job_title}', '${j.company_name}')">Apply Now</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-keyword').value = '';
+            document.getElementById('filter-location').value = '';
+            document.getElementById('filter-type').value = '';
+            filterJobs();
+        }
+
+        function triggerApplyModal(jobId, jobTitle, companyName) {
+            window.location.href = `apply.html?job_id=${jobId}&title=${encodeURIComponent(jobTitle)}&company=${encodeURIComponent(companyName)}`;
+        }
+    </script>
+</body>
+</html>
