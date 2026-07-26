@@ -1,0 +1,17 @@
+services:
+  # 1. Django Backend Web Service
+  - type: web
+    name: job-portal-backend
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn Backend.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+
+  # 2. Frontend Static Site
+  - type: web
+    name: job-portal-frontend
+    env: static
+    buildCommand: ""
+    staticPublishPath: "./Frontend"
